@@ -1,7 +1,6 @@
 """
 Author: Harold Ligon
 Date written: 12/11/2024
-Assignment: SDEV 140: Final Project
 This program gathers the users choice selection for a pizza then creates an order.
 """
 
