@@ -23,10 +23,24 @@ greetingWindow.after(1500, lambda: greetingWindow.destroy())
 menuWindow = tk.Tk()
 menuWindow.title("Customize Your Pizza")
 menuWindow.geometry("900x600")
+menuWindow.resizable(True, True)  # Make the window resizable
+
 
 # Create and display heading
-headingLabel = tk.Label(menuWindow, text = "Customize Your Pizza", font = ("Times New Roman", 30, "bold"))
-headingLabel.grid(row = 0, column = 0, columnspan = 5, pady = 10)
+headingLabel = tk.Label(menuWindow, text = "Customize Your Pizza", font = ("Times New Roman", 40, "bold"))
+headingLabel.grid(row = 0, column = 0, columnspan = 7, pady = 0, sticky = tk.NSEW)
+
+# Uncomment the following lines to change the banner to an image
+# from PIL import Image, ImageTk
+# bannerImage = Image.open("path/to/your/image.png")
+# bannerPhoto = ImageTk.PhotoImage(bannerImage)
+# bannerLabel.config(image=bannerPhoto)
+
+# Configure the grid to expand proportionally
+for i in range(8):
+    menuWindow.grid_rowconfigure(i, weight=1)
+for i in range(7):
+    menuWindow.grid_columnconfigure(i, weight=1)
 
 # Dictionary to store selected items for size, crust, sauce, cheese
 selectedItems = {}
@@ -42,41 +56,36 @@ options = {
 # Display options and radio buttons
 rowIndex = 1
 for option, items in options.items():
-    optionLabel = tk.Label(menuWindow, text = option, font = ("Times New Roman", 12, "bold"))
-    optionLabel.grid(row = rowIndex, column = 3, columnspan = 8, sticky = tk.W)
+    optionLabel = tk.Label(menuWindow, text = option, font = ("Times New Roman", 20, "bold"))
+    optionLabel.grid(row = rowIndex, column = 0, columnspan = 7, pady = 2, sticky = tk.NSEW)
+    rowIndex += 2
 
     if option != "Toppings":
         selectedVar = tk.StringVar()
-        selectedVar.set(items[0])  # Set default selection
+        selectedVar.set("")  # Set default selection to an empty string
         selectedItems[option] = selectedVar
     else:
         selectedItems[option] = []
         for item in items:
             var = tk.IntVar()
+            var.set(0)  # Set default selection to 0 (unselected)
             selectedItems[option].append(var)
     
     rowIndex += 1
 
-    colIndex = 1
+    colIndex = 2
     for item in items:
         if option != "Toppings":
-            itemButton = tk.Radiobutton(menuWindow, text = item, font = ("Times New Roman", 10), variable = selectedItems[option], value = item)
+            itemButton = tk.Radiobutton(menuWindow, text = item, font = ("Times New Roman", 15), variable = selectedItems[option], value = item)
         else:
-            itemButton = tk.Checkbutton(menuWindow, text = item, font = ("Times New Roman", 10), variable = selectedItems[option][colIndex-1], onvalue = item, offvalue = "")
-        itemButton.grid(row = rowIndex, column = colIndex, padx = 20, sticky = tk.W)
+            itemButton = tk.Checkbutton(menuWindow, text = item, font = ("Times New Roman", 15), variable = selectedItems[option][colIndex-2], onvalue = item, offvalue = "")
+        itemButton.grid(row = rowIndex, column = colIndex, padx = 5, pady = 2, sticky = tk.NSEW)
         colIndex += 1
 
-# Function to verify selections and show the view order window
-def verifySelection():
-    selectedCategoryCounts = {option: sum([1 if option == var.get() else 0 for var in selectedItems.values()]) for option in options}
-    selectedItemCount = sum(selectedCategoryCounts.values())
-    if selectedItemCount == 1:
-        showViewOrderWindow()
-    elif selectedItemCount == 0 or selectedItemCount > 1:
-        messagebox.showerror("Error", "Please select only one item to add to the oven.")
+    rowIndex += 7 # Add 7 empty rows between each item grid
 
-verifyButton = tk.Button(menuWindow, text = "Add to Oven", command = verifySelection)
-verifyButton.grid(row = 15, column = 3, pady = 10)
+# Add 15 rows of space below the last item button directory
+rowIndex += 15
 
 # View Order Window
 viewOrderWindow = tk.Toplevel(menuWindow)
@@ -84,7 +93,8 @@ viewOrderWindow.title("View Order")
 viewOrderWindow.geometry("900x600")
 viewOrderWindow.withdraw()  # Keep the View Order window hidden
 
-
+backButton = tk.Button(viewOrderWindow, text = "Go Back", command = lambda: openMenuWindow(viewOrderWindow, menuWindow))
+backButton.pack(pady = 10)
 
 # Function to show the view order window
 def showViewOrderWindow():
@@ -99,14 +109,37 @@ def showViewOrderWindow():
 
     selectedItemsStr = " | ".join(selectedItemsList)
 
-    orderLabel = tk.Label(viewOrderWindow, text = selectedItemsStr, font = ("Times New Roman", 12))
+    orderLabel = tk.Label(viewOrderWindow, text = selectedItemsStr, font = ("Times New Roman", 15))
     orderLabel.pack()
 
     menuWindow.withdraw()
     viewOrderWindow.deiconify()
 
-viewOrderButton = tk.Button(menuWindow, text = "View Order", command = showViewOrderWindow)
-viewOrderButton.grid(row = 15, column = 4, pady = 10)
+# Function to verify selections and show the view order window
+def verifySelection():
+    selectedItemCount = 0
+    for option, var in selectedItems.items():
+        if isinstance(var, list):  # Handle Toppings separately
+            selectedItemCount += sum([1 for v in var if v.get() != 0])
+        else:
+            if var.get() != "":
+                selectedItemCount += 1
+    requiredSelections = ["Size", "Crust", "Sauce", "Cheese"]
+    missingSelections = [option for option in requiredSelections if selectedItems[option].get() == ""]
+    
+    if missingSelections:
+        messagebox.showerror("Error", f"Please select an option for: {', '.join(missingSelections)}")
+    else:
+        showViewOrderWindow()
+
+verifyButton = tk.Button(menuWindow, text = "Add to Oven", font = ("Times New Roman", 15, "bold"), command = verifySelection)
+verifyButton.grid(row = rowIndex, column = 3, columnspan = 2, pady = 10, sticky = tk.NSEW)
+
+viewOrderButton = tk.Button(menuWindow, text = "View Order", font = ("Times New Roman", 15, "bold"), command = showViewOrderWindow)
+viewOrderButton.grid(row = rowIndex, column = 5, columnspan = 2, pady = 10, sticky = tk.NSEW)
+
+# Add 25 rows of space below the buttons
+rowIndex += 25
 
 # View Order Window
 viewOrderWindow = tk.Toplevel(menuWindow)
