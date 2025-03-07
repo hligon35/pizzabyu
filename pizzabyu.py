@@ -16,8 +16,9 @@ def centerWindow(window):
     y = (window.winfo_screenheight() // 2) - (height // 2)
     window.geometry(f'{width}x{height}+{x}+{y}')
 
-# Initialize the order summary
+# Initialize the order summary and order counts
 currentOrderSummary = ""
+orderCounts = {}
 
 # Create the main window
 greetingWindow = tk.Tk()
@@ -88,30 +89,33 @@ def openMenuWindow():
     def addToOven():
         for key in ["Size", "Crust", "Sauce", "Cheese"]:
             if not any(var.get() for _, var in pizzaVars[key]):
-                messagebox.showerror("Error", f"Please select at least one {key.lower()}.")
+                messagebox.showerror("Error", f"Please select ONLY one {key.lower()}.")
                 return
         
         # Prepare the order summary
         orderSummary = ""
         for key, items in pizzaVars.items():
             selected = [name for name, var in items if var.get() == 1]
-            if selected:
+            if selected or key == "Toppings":
                 orderSummary += f"{key}: {', '.join(selected)}. "
         
         updateOrderSummary(orderSummary)
 
-# Function to update the order summary
+    # Function to update the order summary
     def updateOrderSummary(summary):
-        global currentOrderSummary
-        if currentOrderSummary:
-            # Split the current summary into lines and count them
-            currentOrderLines = currentOrderSummary.strip().split('\n')
-            currentOrderSummary += f"\n{len(currentOrderLines) + 1}. {summary}"
+        global currentOrderSummary, orderCounts
+        if summary in orderCounts:
+            orderCounts[summary] += 1
         else:
-            currentOrderSummary = f"1. {summary}"
+            orderCounts[summary] = 1
+        
+        # Rebuild the current order summary
+        currentOrderSummary = ""
+        for idx, (order, count) in enumerate(orderCounts.items(), start=1):
+            currentOrderSummary += f"{idx}. {order} ({count})\n"
 
     # Function to show the order summary
-    def showOrderSummary(event, menuWindow):
+    def showOrderSummary(event):
         if 'currentOrderSummary' in globals() and currentOrderSummary:
             global summaryWindow
             summaryWindow = tk.Toplevel(menuWindow)
@@ -126,12 +130,12 @@ def openMenuWindow():
             width = summaryLabel.winfo_reqwidth() + 20
             height = summaryLabel.winfo_reqheight() + 20
             summaryWindow.geometry(f"{width}x{height}")
-    
+
     # Function to hide the order summary pop-up window
     def hideOrderSummary(event):
         if 'summaryWindow' in globals():
             summaryWindow.destroy()
-    
+
     # Function to show the order summary in a table format
     def showOrderCart(menuWindow):
         if 'currentOrderSummary' in globals() and currentOrderSummary:
@@ -140,7 +144,7 @@ def openMenuWindow():
             cartWindow.title("Order Cart")
             cartWindow.geometry("900x600")
             cartWindow.resizable(True, True)
-            
+
             cartLabel = tk.Label(cartWindow, text="Order Cart", font=("Times New Roman", 20, "bold"))
             cartLabel.pack(pady=10)
             
@@ -149,30 +153,30 @@ def openMenuWindow():
             for line in orderLines:
                 entryLabel = tk.Label(cartWindow, text=line, font=("Times New Roman", 14))
                 entryLabel.pack(anchor=tk.W, padx=40, pady=2)
-    
+
     # Function to add shadow effect on hover
     def onEnter(event):
         event.widget.config(relief="raised", bd=2)
 
     def onLeave(event):
         event.widget.config(relief="flat", bd=1)
-    
+
     row += 3  # Increment row for button placement
 
     # View Order button
-    viewOrderButton = tk.Button(menuWindow, text="View Order", font=("Times New Roman", 20), activebackground="yellow")
-    viewOrderButton.grid(row=row, column=0, columnspan=2, padx=40, pady=20, sticky=tk.NSEW)
-    viewOrderButton.bind("<ButtonPress>", lambda event: showOrderSummary(event, menuWindow))
-    viewOrderButton.bind("<ButtonRelease>", hideOrderSummary)
-    viewOrderButton.bind("<Enter>", onEnter)
-    viewOrderButton.bind("<Leave>", onLeave)
-    
+    previewOrderButton = tk.Button(menuWindow, text="View Order", font=("Times New Roman", 20), activebackground="yellow")
+    previewOrderButton.grid(row=row, column=0, columnspan=2, padx=40, pady=20, sticky=tk.NSEW)
+    previewOrderButton.bind("<ButtonPress>", showOrderSummary)
+    previewOrderButton.bind("<ButtonRelease>", hideOrderSummary)
+    previewOrderButton.bind("<Enter>", onEnter)
+    previewOrderButton.bind("<Leave>", onLeave)
+
     # Add to Oven button
     addToOvenButton = tk.Button(menuWindow, text="Add to Oven", command=addToOven, font=("Times New Roman", 20), activebackground="orange")
     addToOvenButton.grid(row=row, column=2, columnspan=3, padx=40, pady=20, sticky=tk.NSEW)
     addToOvenButton.bind("<Enter>", onEnter)
     addToOvenButton.bind("<Leave>", onLeave)
-    
+
     # Finish button
     finishButton = tk.Button(menuWindow, text="Finish", command=lambda: showOrderCart(menuWindow), font=("Times New Roman", 20), activebackground="green")
     finishButton.grid(row=row, column=5, columnspan=2, padx=40, pady=20, sticky=tk.NSEW)
