@@ -31,7 +31,9 @@ centerWindow(greetingWindow)
 titleLabel = tk.Label(greetingWindow, text="PizzaByU", font=("Times New Roman", 100))
 titleLabel.pack(expand=True, fill=tk.BOTH)
 
-# Function to open the menu window
+loyaltyInfo = []
+uniqueID = 1
+
 def openMenuWindow():
     # Order Screen Window
     menuWindow = tk.Tk()
@@ -178,6 +180,78 @@ def openMenuWindow():
                 entryLabel = tk.Label(cartWindow, text=line, font=("Times New Roman", 14))
                 entryLabel.pack(anchor=tk.W, padx=40, pady=2)
 
+            # Form for user information
+            formFrame = tk.Frame(cartWindow)
+            formFrame.pack(pady=20)
+
+            tk.Label(formFrame, text="First Name:", font=("Times New Roman", 14)).grid(row=0, column=0, padx=5, pady=5)
+            firstNameEntry = tk.Entry(formFrame, font=("Times New Roman", 14))
+            firstNameEntry.grid(row=0, column=1, padx=5, pady=5)
+
+            tk.Label(formFrame, text="Last Name:", font=("Times New Roman", 14)).grid(row=0, column=2, padx=5, pady=5)
+            lastNameEntry = tk.Entry(formFrame, font=("Times New Roman", 14))
+            lastNameEntry.grid(row=0, column=3, padx=5, pady=5)
+
+            tk.Label(formFrame, text="Address:", font=("Times New Roman", 14)).grid(row=1, column=0, padx=5, pady=5)
+            addressEntry = tk.Entry(formFrame, font=("Times New Roman", 14))
+            addressEntry.grid(row=1, column=1, columnspan=3, padx=5, pady=5, sticky=tk.W+tk.E)
+
+            tk.Label(formFrame, text="Email:", font=("Times New Roman", 14)).grid(row=2, column=0, padx=5, pady=5)
+            emailEntry = tk.Entry(formFrame, font=("Times New Roman", 14))
+            emailEntry.grid(row=2, column=1, columnspan=3, padx=5, pady=5, sticky=tk.W+tk.E)
+
+            tk.Label(formFrame, text="Phone Number:", font=("Times New Roman", 14)).grid(row=3, column=0, padx=5, pady=5)
+            phoneEntry = tk.Entry(formFrame, font=("Times New Roman", 14), width=12)
+            phoneEntry.grid(row=3, column=1, columnspan=3, padx=5, pady=5, sticky=tk.W+tk.E)
+
+            def formatPhoneNumber(event):
+                phone = phoneEntry.get().replace("-", "")
+                if len(phone) > 6:
+                    phone = phone[:3] + "-" + phone[3:6] + "-" + phone[6:10]
+                elif len(phone) > 3:
+                    phone = phone[:3] + "-" + phone[3:6]
+                phoneEntry.delete(0, tk.END)
+                phoneEntry.insert(0, phone)
+
+            phoneEntry.bind("<KeyRelease>", formatPhoneNumber)
+
+            def submitForm():
+                global uniqueID
+                firstName = firstNameEntry.get()
+                lastName = lastNameEntry.get()
+                address = addressEntry.get()
+                email = emailEntry.get()
+                phone = phoneEntry.get()
+
+                if not (firstName and lastName and address and email and phone):
+                    messagebox.showerror("Error", "All fields are required.")
+                    return
+
+                loyaltyInfo.append({
+                    "ID": uniqueID,
+                    "First Name": firstName,
+                    "Last Name": lastName,
+                    "Address": address,
+                    "Email": email,
+                    "Phone": phone
+                })
+                uniqueID += 1
+
+                messagebox.showinfo("Success", "Thank you for joining the rewards club!")
+                firstNameEntry.delete(0, tk.END)
+                lastNameEntry.delete(0, tk.END)
+                addressEntry.delete(0, tk.END)
+                emailEntry.delete(0, tk.END)
+                phoneEntry.delete(0, tk.END)
+
+                # Remove the form and display thank you message
+                formFrame.pack_forget()
+                thankYouLabel = tk.Label(cartWindow, text="Thank you for joining the rewards club!", font=("Times New Roman", 24, "bold"))
+                thankYouLabel.pack(pady=20)
+
+            submitButton = tk.Button(formFrame, text="Submit", command=submitForm, font=("Times New Roman", 14))
+            submitButton.grid(row=4, column=0, columnspan=4, pady=10)
+
             # Back button to return to the menu window
             def backToMenu():
                 cartWindow.destroy()
@@ -187,6 +261,7 @@ def openMenuWindow():
             backButton = tk.Button(cartWindow, text="Back", command=backToMenu, font=("Times New Roman", 20), activebackground="yellow")
             backButton.bind("<Enter>", onEnter)
             backButton.bind("<Leave>", onLeave)
+            backButton.pack(side=tk.LEFT, padx=5, pady=5)
 
             # Send to Oven button
             def sendToOven():
@@ -215,28 +290,7 @@ def openMenuWindow():
             sendToOvenButton = tk.Button(cartWindow, text="Send to Oven", command=sendToOven, font=("Times New Roman", 20), activebackground="orange")
             sendToOvenButton.bind("<Enter>", onEnter)
             sendToOvenButton.bind("<Leave>", onLeave)
-
-            ## Center the buttons horizontally and vertically in the middle of the cart window
-            buttonFrame = tk.Frame(cartWindow)
-            buttonFrame.pack(expand=True)
-
-            # Back button to return to the menu window
-            def backToMenu():
-                cartWindow.destroy()
-                openMenuWindow()
-
-            # Back button
-            backButton = tk.Button(cartWindow, text="Back", command=backToMenu, font=("Times New Roman", 20), activebackground="yellow")
-            backButton.bind("<Enter>", onEnter)
-            backButton.bind("<Leave>", onLeave)
-
-            backButton.pack(in_=buttonFrame, side=tk.LEFT, padx=5, pady=5)
-            sendToOvenButton.pack(in_=buttonFrame, side=tk.RIGHT, padx=5, pady=5)
-
-            ## Ensure the buttons are at least 5 rows from the last order entry
-            for _ in range(5):
-                spacer = tk.Label(cartWindow, text="")
-                spacer.pack()
+            sendToOvenButton.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # Function to add effect on hover
     def onEnter(event):
