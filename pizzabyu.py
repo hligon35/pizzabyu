@@ -6,6 +6,7 @@ This program gathers the user's choice selection for a pizza then creates an ord
 
 import tkinter as tk
 from tkinter import messagebox
+from datetime import datetime, timedelta
 
 # Function to center a window
 def centerWindow(window):
@@ -63,16 +64,24 @@ def openMenuWindow():
     optionValues = [sizeOptions, crustOptions, sauceOptions, cheeseOptions, toppingsOptions]
 
     # Center all pizzaOptions horizontally and evenly space them
-    def createOptionMenu(optionName, optionValues, row, columnspan, columnshift=0):
+    def createOptionMenu(optionName, optionValues, row, columnspan, columnshift=0, multiple=False):
         label = tk.Label(menuWindow, text=optionName, font=("Times New Roman", 20))
         label.grid(row=row, column=columnshift, columnspan=columnspan, pady=10, sticky=tk.NSEW)
         
         varList = []
-        for index, value in enumerate(optionValues):
-            var = tk.IntVar()
-            checkbutton = tk.Checkbutton(menuWindow, text=value, variable=var, font=("Times New Roman", 18))
-            checkbutton.grid(row=row+1, column=index + columnshift, padx=10, pady=5, sticky=tk.NSEW)
-            varList.append((value, var))
+        if multiple:
+            for index, value in enumerate(optionValues):
+                var = tk.IntVar()
+                checkbutton = tk.Checkbutton(menuWindow, text=value, variable=var, font=("Times New Roman", 18))
+                checkbutton.grid(row=row+1, column=index + columnshift, padx=10, pady=5, sticky=tk.NSEW)
+                varList.append((value, var))
+        else:
+            ## Initialize the variable with an empty string to avoid the visual issue
+            var = tk.StringVar(value="")
+            for index, value in enumerate(optionValues):
+                radiobutton = tk.Radiobutton(menuWindow, text=value, variable=var, value=value, font=("Times New Roman", 18))
+                radiobutton.grid(row=row+1, column=index + columnshift, padx=10, pady=5, sticky=tk.NSEW)
+            varList.append((optionName, var))
         
         pizzaVars[optionName] = varList
 
@@ -81,25 +90,36 @@ def openMenuWindow():
     createOptionMenu(optionKeys[0], optionValues[0], row, columnspan=7)  # Size options
     row += 3
     for i in range(1, 4):  # Crust, Sauce, Cheese options
-        createOptionMenu(optionKeys[i], optionValues[i], row, columnspan=5, columnshift=2)
+        createOptionMenu(optionKeys[i], optionValues[i], row, columnspan=3, columnshift=2)
         row += 3
-    createOptionMenu(optionKeys[4], optionValues[4], row, columnspan=7)  # Toppings options
+    createOptionMenu(optionKeys[4], optionValues[4], row, columnspan=7, multiple=True)  # Toppings options
 
     # Function to validate selections and prepare the order summary
-    def addToOven():
+    def addToPan():
         for key in ["Size", "Crust", "Sauce", "Cheese"]:
-            if not any(var.get() for _, var in pizzaVars[key]):
-                messagebox.showerror("Error", f"Please select ONLY one {key.lower()}.")
+            if not pizzaVars[key][0][1].get():
+                messagebox.showerror("Error", f"Please select one {key.lower()} option.")
                 return
         
         # Prepare the order summary
         orderSummary = ""
         for key, items in pizzaVars.items():
-            selected = [name for name, var in items if var.get() == 1]
-            if selected or key == "Toppings":
+            if key == "Toppings":
+                selected = [name for name, var in items if var.get() == 1]
+            else:
+                selected = [items[0][1].get()]
+            if selected:
                 orderSummary += f"{key}: {', '.join(selected)}. "
         
         updateOrderSummary(orderSummary)
+
+        # Reset all item values to default
+        for key, items in pizzaVars.items():
+            if key == "Toppings":
+                for _, var in items:
+                    var.set(0)
+            else:
+                items[0][1].set("")
 
     # Function to update the order summary
     def updateOrderSummary(summary):
@@ -115,21 +135,23 @@ def openMenuWindow():
             currentOrderSummary += f"{idx}. {order} ({count})\n"
 
     # Function to show the order summary
-    def showOrderSummary(event):
+    def previewOrderSummary(event):
         if 'currentOrderSummary' in globals() and currentOrderSummary:
             global summaryWindow
             summaryWindow = tk.Toplevel(menuWindow)
             summaryWindow.title("Order Summary")
             summaryWindow.resizable(True, True)
             
+            ## Add heading saying "Preview Order" in the center of the very top row
+            summaryHeading = tk.Label(summaryWindow, text="Preview Order", font=("Times New Roman", 24, "bold"))
+            summaryHeading.pack(pady=10)
+            
             summaryLabel = tk.Label(summaryWindow, text=currentOrderSummary, font=("Times New Roman", 14))
             summaryLabel.pack(expand=True, fill=tk.BOTH)
             
             # Adjust the window size to fit the content
             summaryWindow.update_idletasks()
-            width = summaryLabel.winfo_reqwidth() + 20
-            height = summaryLabel.winfo_reqheight() + 20
-            summaryWindow.geometry(f"{width}x{height}")
+            centerWindow(summaryWindow)
 
     # Function to hide the order summary pop-up window
     def hideOrderSummary(event):
@@ -144,9 +166,11 @@ def openMenuWindow():
             cartWindow.title("Order Cart")
             cartWindow.geometry("900x600")
             cartWindow.resizable(True, True)
-
-            cartLabel = tk.Label(cartWindow, text="Order Cart", font=("Times New Roman", 20, "bold"))
-            cartLabel.pack(pady=10)
+            centerWindow(cartWindow)
+            
+            ## Add heading saying "Order Cart" in the center of the very top row
+            cartHeading = tk.Label(cartWindow, text="Order Cart", font=("Times New Roman", 24, "bold"))
+            cartHeading.pack(pady=10)
             
             # Split the order summary into lines and display each line in a new row
             orderLines = currentOrderSummary.strip().split('\n')
@@ -154,34 +178,94 @@ def openMenuWindow():
                 entryLabel = tk.Label(cartWindow, text=line, font=("Times New Roman", 14))
                 entryLabel.pack(anchor=tk.W, padx=40, pady=2)
 
-    # Function to add shadow effect on hover
+            # Back button to return to the menu window
+            def backToMenu():
+                cartWindow.destroy()
+                openMenuWindow()
+
+            # Back button
+            backButton = tk.Button(cartWindow, text="Back", command=backToMenu, font=("Times New Roman", 20), activebackground="yellow")
+            backButton.bind("<Enter>", onEnter)
+            backButton.bind("<Leave>", onLeave)
+
+            # Send to Oven button
+            def sendToOven():
+                cartWindow.destroy()
+                thankYouWindow = tk.Tk()
+                thankYouWindow.title("Thank You")
+                thankYouWindow.geometry("600x400")
+                centerWindow(thankYouWindow)
+                
+                # Calculate the total number of pizzas
+                totalPizzas = sum(int(line.split('(')[-1].strip(')')) for line in orderLines)
+                
+                # Calculate the pizzaTime
+                pizzaTime = 15 + (totalPizzas - 1) * 3
+                
+                # Calculate the pick-up time
+                pickUpTime = datetime.now() + timedelta(minutes=pizzaTime)
+                pickUpTimeStr = pickUpTime.strftime("%I:%M %p")
+                
+                thankYouLabel = tk.Label(thankYouWindow, text=f"Thank you for ordering with PizzaByU!\nYour order will be ready for pick up by {pickUpTimeStr}.", font=("Times New Roman", 20))
+                thankYouLabel.pack(expand=True, fill=tk.BOTH)
+                
+                # Close the thank you window after 15 seconds
+                thankYouWindow.after(15000, thankYouWindow.destroy)
+
+            sendToOvenButton = tk.Button(cartWindow, text="Send to Oven", command=sendToOven, font=("Times New Roman", 20), activebackground="orange")
+            sendToOvenButton.bind("<Enter>", onEnter)
+            sendToOvenButton.bind("<Leave>", onLeave)
+
+            ## Center the buttons horizontally and vertically in the middle of the cart window
+            buttonFrame = tk.Frame(cartWindow)
+            buttonFrame.pack(expand=True)
+
+            # Back button to return to the menu window
+            def backToMenu():
+                cartWindow.destroy()
+                openMenuWindow()
+
+            # Back button
+            backButton = tk.Button(cartWindow, text="Back", command=backToMenu, font=("Times New Roman", 20), activebackground="yellow")
+            backButton.bind("<Enter>", onEnter)
+            backButton.bind("<Leave>", onLeave)
+
+            backButton.pack(in_=buttonFrame, side=tk.LEFT, padx=5, pady=5)
+            sendToOvenButton.pack(in_=buttonFrame, side=tk.RIGHT, padx=5, pady=5)
+
+            ## Ensure the buttons are at least 5 rows from the last order entry
+            for _ in range(5):
+                spacer = tk.Label(cartWindow, text="")
+                spacer.pack()
+
+    # Function to add effect on hover
     def onEnter(event):
         event.widget.config(relief="raised", bd=2)
 
     def onLeave(event):
-        event.widget.config(relief="flat", bd=1)
+        event.widget.config(relief="raised", bd=1)
 
     row += 3  # Increment row for button placement
 
-    # View Order button
-    previewOrderButton = tk.Button(menuWindow, text="View Order", font=("Times New Roman", 20), activebackground="yellow")
-    previewOrderButton.grid(row=row, column=0, columnspan=2, padx=40, pady=20, sticky=tk.NSEW)
-    previewOrderButton.bind("<ButtonPress>", showOrderSummary)
+    # Preview Order button
+    previewOrderButton = tk.Button(menuWindow, text="Preview Order", font=("Times New Roman", 20), activebackground="yellow")
+    previewOrderButton.grid(row=row, column=0, columnspan=2, padx=20, pady=20, sticky=tk.NSEW)
+    previewOrderButton.bind("<ButtonPress>", previewOrderSummary)
     previewOrderButton.bind("<ButtonRelease>", hideOrderSummary)
     previewOrderButton.bind("<Enter>", onEnter)
     previewOrderButton.bind("<Leave>", onLeave)
 
-    # Add to Oven button
-    addToOvenButton = tk.Button(menuWindow, text="Add to Oven", command=addToOven, font=("Times New Roman", 20), activebackground="orange")
-    addToOvenButton.grid(row=row, column=2, columnspan=3, padx=40, pady=20, sticky=tk.NSEW)
-    addToOvenButton.bind("<Enter>", onEnter)
-    addToOvenButton.bind("<Leave>", onLeave)
+    # Add to Pan button
+    addToPanButton = tk.Button(menuWindow, text="Add to Pan", command=addToPan, font=("Times New Roman", 20), activebackground="orange")
+    addToPanButton.grid(row=row, column=2, columnspan=3, padx=20, pady=20, sticky=tk.NSEW)
+    addToPanButton.bind("<Enter>", onEnter)
+    addToPanButton.bind("<Leave>", onLeave)
 
-    # Finish button
-    finishButton = tk.Button(menuWindow, text="Finish", command=lambda: showOrderCart(menuWindow), font=("Times New Roman", 20), activebackground="green")
-    finishButton.grid(row=row, column=5, columnspan=2, padx=40, pady=20, sticky=tk.NSEW)
-    finishButton.bind("<Enter>", onEnter)
-    finishButton.bind("<Leave>", onLeave)
+    # Finish Order button
+    finishOrderButton = tk.Button(menuWindow, text="Finish Order", command=lambda: showOrderCart(menuWindow), font=("Times New Roman", 20), activebackground="green")
+    finishOrderButton.grid(row=row, column=5, columnspan=2, padx=20, pady=20, sticky=tk.NSEW)
+    finishOrderButton.bind("<Enter>", onEnter)
+    finishOrderButton.bind("<Leave>", onLeave)
 
     # Start the menu window main loop
     menuWindow.mainloop()
