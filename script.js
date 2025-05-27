@@ -73,13 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners for Menu Screen ---
     previewOrderBtn.addEventListener('mousedown', () => {
-        currentOrder = getSelectedOptions();
-        const summary = generateOrderSummary(currentOrder);
-        if (!summary) {
-            alert("Please make some selections first.");
-            return;
+        if (Object.keys(orderCart).length === 0) {
+            previewText.textContent = "Your pan is currently empty."; // textContent is fine for a simple string
+        } else {
+            let cartSummaryHTML = "<b>Items in your pan:</b><br>";
+            let itemNumber = 1;
+            for (const [summary, count] of Object.entries(orderCart)) {
+                cartSummaryHTML += `${itemNumber}. ${summary} (Quantity: ${count})<br>`;
+                itemNumber++;
+            }
+            previewText.innerHTML = cartSummaryHTML; // Use innerHTML to render <br> tags
         }
-        previewText.textContent = summary;
         currentOrderPreviewModal.style.display = 'flex';
     });
 
@@ -132,38 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cartScreen.style.display = 'none';
     });
 
-    sendToOvenBtn.addEventListener('click', () => {
-        let totalPizzas = 0;
-        for (const count of Object.values(orderCart)) {
-            totalPizzas += count;
-        }
-
-        if (totalPizzas === 0) {
-            alert("Your cart is empty!");
-            return;
-        }
-
-        const pizzaTime = 15 + (totalPizzas - 1) * 3;
-        const pickUpTime = new Date(new Date().getTime() + pizzaTime * 60000);
-        const pickUpTimeStr = pickUpTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-        thankYouMessage.textContent = `Thank you for ordering with PizzaByU! Your order will be ready for pick up by ${pickUpTimeStr}.`;
-        
-        cartScreen.style.display = 'none';
-        thankYouScreen.style.display = 'block';
-
-        // Reset for next order
-        orderCart = {};
-        resetSelections();
-        document.getElementById('rewardsForm').reset();
-
-        setTimeout(() => {
-            thankYouScreen.style.display = 'none';
-            menuScreen.style.display = 'block'; // Or a greeting screen if you add one
-        }, 15000);
-    });
-
-    submitRewardsBtn.addEventListener('click', () => {
+    submitRewardsBtn.addEventListener('click', async () => {
+        console.log("Submit Rewards button clicked");
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         const address = document.getElementById('address').value;
@@ -172,19 +146,135 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!firstName || !lastName || !address || !email || !phone) {
             alert("All fields are required for rewards club.");
+            console.warn("Rewards form validation failed: All fields required.");
             return;
         }
 
-        // In a real app, you'd send this data to a server
-        console.log("Rewards Info:", { firstName, lastName, address, email, phone });
-        alert("Thank you for joining the rewards club!");
-        document.getElementById('rewardsForm').reset();
-        document.querySelector('.customer-info').style.display = 'none'; // Hide form
-        const thankYouRewards = document.createElement('p');
-        thankYouRewards.textContent = "Thank you for joining the rewards club!";
-        thankYouRewards.style.textAlign = 'center';
-        thankYouRewards.style.fontWeight = 'bold';
-        document.querySelector('.customer-info').parentNode.insertBefore(thankYouRewards, document.querySelector('.cart-actions'));
+        const memberData = { firstName, lastName, address, email, phone };
+        console.log("Attempting to submit loyalty data:", memberData);
+
+        try {
+            const response = await fetch('http://localhost:3000/api/loyalty', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(memberData),
+            });
+
+            console.log("Loyalty submission response status:", response.status);
+            const responseText = await response.text(); // Get raw response text
+            console.log("Loyalty submission raw response text:", responseText);
+
+            let result;
+            try {
+                result = JSON.parse(responseText); // Try to parse as JSON
+            } catch (e) {
+                console.error("Failed to parse loyalty response as JSON:", e);
+                alert("Received an invalid response from the server for loyalty signup.");
+                return;
+            }
+            
+            console.log("Loyalty submission parsed response:", result);
+
+            if (response.ok) {
+                alert(result.message || "Thank you for joining the rewards club!");
+                document.getElementById('rewardsForm').reset();
+                document.querySelector('.customer-info').style.display = 'none'; 
+                const thankYouRewards = document.createElement('p');
+                thankYouRewards.textContent = result.message || "Thank you for joining the rewards club!";
+                thankYouRewards.style.textAlign = 'center';
+                thankYouRewards.style.fontWeight = 'bold';
+                document.querySelector('.customer-info').parentNode.insertBefore(thankYouRewards, document.querySelector('.cart-actions'));
+            } else {
+                alert(result.message || "Failed to join rewards club. Status: " + response.status);
+                console.error("Failed to join rewards club:", result);
+            }
+        } catch (error) {
+            console.error("Error submitting rewards info:", error);
+            alert("An error occurred while submitting rewards info. Check the console for details.");
+        }
+    });
+
+    sendToOvenBtn.addEventListener('click', async () => {
+        console.log("Send to Oven button clicked");
+        let totalPizzas = 0;
+        const orderItems = [];
+
+        for (const [summary, count] of Object.entries(orderCart)) {
+            totalPizzas += count;
+            orderItems.push({ description: summary, quantity: count });
+        }
+
+        if (totalPizzas === 0) {
+            alert("Your cart is empty!");
+            console.warn("Send to Oven validation failed: Cart is empty.");
+            return;
+        }
+
+        const pizzaTime = 15 + (totalPizzas - 1) * 3;
+        const pickUpTime = new Date(new Date().getTime() + pizzaTime * 60000);
+        const pickUpTimeStr = pickUpTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+        const orderData = {
+            items: orderItems,
+            totalAmount: null, 
+            customerDetails: { 
+                name: (document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value).trim() || "Guest"
+            }
+        };
+        console.log("Attempting to send order data:", orderData);
+
+        try {
+            const response = await fetch('http://localhost:3000/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData),
+            });
+
+            console.log("Order submission response status:", response.status);
+            const responseText = await response.text(); // Get raw response text
+            console.log("Order submission raw response text:", responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText); // Try to parse as JSON
+            } catch (e) {
+                console.error("Failed to parse order response as JSON:", e);
+                alert("Received an invalid response from the server for order submission.");
+                return;
+            }
+
+            console.log("Order submission parsed response:", result);
+
+            if (response.ok && result.order) { // Check for result.order as well
+                thankYouMessage.textContent = `Thank you for ordering with PizzaByU! Your order #${result.order.orderId} will be ready for pick up by ${pickUpTimeStr}.`;
+                cartScreen.style.display = 'none';
+                thankYouScreen.style.display = 'block';
+
+                orderCart = {};
+                resetSelections();
+                document.getElementById('rewardsForm').reset();
+                document.querySelector('.customer-info').style.display = 'block';
+                const existingThankYouRewards = document.querySelector('.customer-info').parentNode.querySelector('p[style*="font-weight: bold"]');
+                if (existingThankYouRewards) {
+                    existingThankYouRewards.remove();
+                }
+
+                setTimeout(() => {
+                    thankYouScreen.style.display = 'none';
+                    menuScreen.style.display = 'block';
+                }, 15000);
+            } else {
+                alert(result.message || "Failed to place order. Status: " + response.status);
+                console.error("Failed to place order:", result);
+            }
+        } catch (error) {
+            console.error("Error placing order:", error);
+            alert("An error occurred while placing your order. Check the console for details.");
+        }
     });
 
     // Initial setup
