@@ -1,0 +1,226 @@
+body {
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top for longer content */
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 1200px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 3em;
+    margin-bottom: 0.2em;
+}
+
+header h2 {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #555;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.pizza-option-group {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+.pizza-option-group legend {
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 0 10px;
+}
+
+.option-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-items.toppings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.option-items label {
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+.option-items input[type="radio"],
+.option-items input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.2);
+}
+
+.full-width {
+    grid-column: 1 / -1; /* Span all columns */
+}
+
+.actions, .cart-actions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.actions button, .cart-actions button, #submitRewardsBtn {
+    padding: 12px 25px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#previewOrderBtn {
+    background-color: #ffc107; /* Yellow */
+}
+
+#addToPanBtn {
+    background-color: #ff9800; /* Orange */
+}
+
+#finishOrderBtn, #sendToOvenBtn {
+    background-color: #4caf50; /* Green */
+    color: white;
+}
+
+#backToMenuBtn {
+    background-color: #607d8b; /* Blue Grey */
+    color: white;
+}
+
+#submitRewardsBtn {
+    background-color: #007bff;
+    color: white;
+    margin-top: 10px;
+}
+
+.actions button:hover, .cart-actions button:hover, #submitRewardsBtn:hover {
+    opacity: 0.9;
+}
+
+.actions button:active, .cart-actions button:active, #submitRewardsBtn:active {
+    transform: scale(0.98);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.close-button {
+    float: right;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* Cart Screen */
+#cartScreen h2, #thankYouScreen h2 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+#cartItems {
+    margin-bottom: 30px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+#cartItems div {
+    padding: 8px 0;
+    border-bottom: 1px dashed #ddd;
+}
+
+#cartItems div:last-child {
+    border-bottom: none;
+}
+
+.customer-info {
+    margin-bottom: 30px;
+}
+
+.customer-info h3 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#rewardsForm label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+#rewardsForm input[type="text"],
+#rewardsForm input[type="email"],
+#rewardsForm input[type="tel"] {
+    width: calc(100% - 22px); /* Account for padding and border */
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#rewardsForm .form-row {
+    display: flex;
+    gap: 20px;
+}
+
+#rewardsForm .form-row > * {
+    flex: 1;
+}
+
+#thankYouScreen p {
+    text-align: center;
+    font-size: 1.2em;
+    line-height: 1.6;
+}

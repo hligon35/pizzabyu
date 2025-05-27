@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PizzaByU - Customize Your Pizza</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>PizzaByU</h1>
+            <h2>Customize Your Pizza</h2>
+        </header>
+
+        <main id="menuScreen">
+            <section class="options-grid">
+                <!-- Size Options -->
+                <fieldset class="pizza-option-group">
+                    <legend>Size</legend>
+                    <div class="option-items">
+                        <label><input type="radio" name="size" value="Personal"> Personal</label>
+                        <label><input type="radio" name="size" value="Small"> Small</label>
+                        <label><input type="radio" name="size" value="Medium"> Medium</label>
+                        <label><input type="radio" name="size" value="Large"> Large</label>
+                        <label><input type="radio" name="size" value="XLarge"> XLarge</label>
+                    </div>
+                </fieldset>
+
+                <!-- Crust Options -->
+                <fieldset class="pizza-option-group">
+                    <legend>Crust</legend>
+                    <div class="option-items">
+                        <label><input type="radio" name="crust" value="Thin"> Thin</label>
+                        <label><input type="radio" name="crust" value="Hand Tossed"> Hand Tossed</label>
+                        <label><input type="radio" name="crust" value="Stuffed"> Stuffed</label>
+                    </div>
+                </fieldset>
+
+                <!-- Sauce Options -->
+                <fieldset class="pizza-option-group">
+                    <legend>Sauce</legend>
+                    <div class="option-items">
+                        <label><input type="radio" name="sauce" value="Light"> Light</label>
+                        <label><input type="radio" name="sauce" value="Regular"> Regular</label>
+                        <label><input type="radio" name="sauce" value="Extra"> Extra</label>
+                    </div>
+                </fieldset>
+
+                <!-- Cheese Options -->
+                <fieldset class="pizza-option-group">
+                    <legend>Cheese</legend>
+                    <div class="option-items">
+                        <label><input type="radio" name="cheese" value="Light"> Light</label>
+                        <label><input type="radio" name="cheese" value="Regular"> Regular</label>
+                        <label><input type="radio" name="cheese" value="Extra"> Extra</label>
+                    </div>
+                </fieldset>
+
+                <!-- Toppings Options -->
+                <fieldset class="pizza-option-group full-width">
+                    <legend>Toppings</legend>
+                    <div class="option-items toppings">
+                        <label><input type="checkbox" name="toppings" value="Three Cheese"> Three Cheese</label>
+                        <label><input type="checkbox" name="toppings" value="Pepperoni"> Pepperoni</label>
+                        <label><input type="checkbox" name="toppings" value="Sausage"> Sausage</label>
+                        <label><input type="checkbox" name="toppings" value="Ham"> Ham</label>
+                        <label><input type="checkbox" name="toppings" value="Onions"> Onions</label>
+                        <label><input type="checkbox" name="toppings" value="Peppers"> Peppers</label>
+                        <label><input type="checkbox" name="toppings" value="Mushrooms"> Mushrooms</label>
+                    </div>
+                </fieldset>
+            </section>
+
+            <section class="actions">
+                <button id="previewOrderBtn">Preview Order</button>
+                <button id="addToPanBtn">Add to Pan</button>
+                <button id="finishOrderBtn">Finish Order</button>
+            </section>
+
+            <section id="currentOrderPreview" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3>Current Order Preview</h3>
+                    <p id="previewText"></p>
+                </div>
+            </section>
+        </main>
+
+        <main id="cartScreen" style="display:none;">
+            <h2>Order Cart</h2>
+            <div id="cartItems">
+                <!-- Cart items will be displayed here -->
+            </div>
+            <section class="customer-info">
+                <h3>Join Rewards Club (Optional)</h3>
+                <form id="rewardsForm">
+                    <div class="form-row">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" name="firstName">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" name="lastName">
+                    </div>
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email">
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" id="phone" name="phone">
+                    <button type="button" id="submitRewardsBtn">Submit Rewards</button>
+                </form>
+            </section>
+            <section class="cart-actions">
+                <button id="backToMenuBtn">Back to Menu</button>
+                <button id="sendToOvenBtn">Send to Oven</button>
+            </section>
+        </main>
+
+        <main id="thankYouScreen" style="display:none;">
+            <h2>Thank You!</h2>
+            <p id="thankYouMessage"></p>
+        </main>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
