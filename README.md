@@ -1,77 +1,90 @@
-# PizzaByU Application
+# PizzaByU Web Application
 
 ## Description
 
-PizzaByU is a desktop application built with Python and Tkinter that allows users to customize and order pizzas. It features a graphical user interface for selecting pizza options, managing an order, and simulating the order process.
+PizzaByU is a web application that allows users to customize and order pizzas. It features an HTML/CSS/JavaScript frontend for selecting pizza options, managing an order cart, and submitting orders. A Node.js backend handles order and loyalty program data persistence (currently using in-memory storage).
 
-## Prerequisites
+## Project Structure
 
-- Python 3.x
-- Tkinter library (typically included with standard Python installations)
+- `index.html`: The main HTML file for the user interface.
+- `style.css`: Contains the styles for the application.
+- `script.js`: Handles the frontend logic, including pizza customization, cart management, and API interactions.
+- `server.js`: The Node.js Express backend server that manages API endpoints for orders and loyalty program signups.
+- `package.json`: Defines project dependencies and scripts for the backend.
+- `README.md`: This file.
 
-## How to Run the Application
+## Setup and Running the Application
 
-1.  Ensure you have Python 3 installed on your system.
-2.  Save the `pizzabyu.py` file to a directory on your computer.
-3.  Open a terminal or command prompt.
-4.  Navigate to the directory where you saved the file.
+### Frontend
+
+1.  Open the `index.html` file in a web browser.
+
+### Backend
+
+1.  Ensure you have Node.js and npm installed on your system.
+2.  Navigate to the project directory in a terminal or command prompt:
     ```sh
-    cd path\to\your\directory
+    cd path/to/your/project/pizzabyu
     ```
-5.  Run the application using the Python interpreter:
+3.  Install the necessary dependencies:
     ```sh
-    python pizzabyu.py
+    npm install
     ```
+4.  Start the backend server:
+    ```sh
+    npm start
+    ```
+    The server will typically run on `http://localhost:3000`.
 
-## How to Use the Application
+## How to Use the Web Application
 
-### 1. Greeting Screen
+### 1. Landing Page (`index.html`)
 
-- Upon launching the application, a "PizzaByU" greeting screen will appear.
-- This screen will automatically transition to the main menu after 1.5 seconds.
+- The application opens to the "Customize Your Pizza" screen.
 
-### 2. Customize Your Pizza (Menu Screen)
-
-This is where you build your pizza(s).
+### 2. Customize Your Pizza
 
 - **Select Pizza Options:**
-  - **Size:** Choose one option (Personal, Small, Medium, Large, XLarge).
-  - **Crust:** Choose one option (Thin, Hand Tossed, Stuffed).
-  - **Sauce:** Choose one option for sauce amount (Light, Regular, Extra).
-  - **Cheese:** Choose one option for cheese amount (Light, Regular, Extra).
-  - **Toppings:** Select one or more toppings (Three Cheese, Pepperoni, Sausage, Ham, Onions, Peppers, Mushrooms).
+  - **Size:** Choose one (e.g., Personal, Small, Medium, Large, XLarge).
+  - **Crust:** Choose one (e.g., Thin, Hand Tossed, Stuffed).
+  - **Sauce:** Choose one (e.g., Light, Regular, Extra).
+  - **Cheese:** Choose one (e.g., Light, Regular, Extra).
+  - **Toppings:** Select one or more (e.g., Three Cheese, Pepperoni, Sausage, Ham, Onions, Peppers, Mushrooms).
 - **Buttons:**
-  - **Preview Order:**
-    - Click and hold this button to see a pop-up window displaying a summary of the pizza you are currently customizing.
-    - The preview window will disappear when you release the mouse button.
-  - **Add to Pan:**
-    - Once you are satisfied with your pizza customization, click this button.
-    - The selected pizza will be added to your order.
-    - The selections on the menu screen will reset, allowing you to customize another pizza if desired.
-    - If you try to add to pan without selecting a size, crust, sauce, or cheese, an error message will appear prompting you to make a selection.
-  - **Finish Order:**
-    - When you have added all desired pizzas to your pan, click this button to proceed to the Order Cart.
+  - **Preview Order:** Click this button to see a summary of the current pizza being customized in a modal.
+  - **Add to Pan:** Adds the currently customized pizza to your order cart. The selections will reset.
+  - **Finish Order:** Takes you to the Order Cart screen to review and submit your order.
 
 ### 3. Order Cart Screen
 
-This screen displays your complete order and allows you to finalize it.
-
-- **Order Summary:**
-  - The top section of this screen shows a list of all pizzas you've added to your order, along with their quantities.
-- **Customer Information Form (Optional Rewards Club):**
-  - Below the order summary, there is a form to join the PizzaByU rewards club.
-  - Fill in your First Name, Last Name, Address, Email, and Phone Number.
-  - The phone number field will automatically format the number as you type (e.g., XXX-XXX-XXXX).
-  - **Submit Button (for rewards form):** Click this after filling in your details to join the rewards club. A confirmation message will appear, and the form will be cleared and hidden.
-  - All fields in the rewards form are required if you choose to submit it.
+- **Order Summary:** Displays all pizzas added to your cart with their details and quantities.
+- **Loyalty Club Signup (Optional):**
+  - A form to enter First Name, Last Name, Address, Email, and Phone Number.
+  - Click "Submit" to join the loyalty club. This will send your information to the backend.
 - **Navigation and Order Finalization Buttons:**
-  - **Back Button:**
-    - If you need to make changes to your order (e.g., add another pizza, modify an existing concept by re-adding), click this button.
-    - It will take you back to the "Customize Your Pizza" menu screen. Your current order cart contents will be preserved.
-  - **Send to Oven Button:**
-    - When you are ready to place your order, click this button.
-    - A "Thank You" window will appear, displaying a confirmation message and an estimated pick-up time for your order.
-    - The pick-up time is calculated based on the number of pizzas (15 minutes for the first pizza + 3 minutes for each additional pizza).
-    - This "Thank You" window will automatically close after 15 seconds. The main application will also close after the cart window is destroyed by this action.
+  - **Back:** Returns to the "Customize Your Pizza" screen.
+  - **Send to Oven:** Submits your complete order to the backend. A "Thank You" message will appear.
+
+## API Endpoints (Backend - `server.js`)
+
+The backend server provides the following API endpoints:
+
+- **POST `/api/loyalty`**
+  - Description: Submits loyalty club signup information.
+  - Request Body: `{ firstName, lastName, address, email, phone }`
+  - Response: Confirmation message or error.
+- **GET `/api/loyalty`**
+  - Description: Retrieves all loyalty club member information (for demonstration).
+  - Response: Array of loyalty member objects.
+- **POST `/api/orders`**
+  - Description: Submits a new pizza order.
+  - Request Body: `{ cart: orderCart }` (where `orderCart` is an object containing pizza summaries and quantities)
+  - Response: Confirmation message with an order ID or error.
+- **GET `/api/orders`**
+  - Description: Retrieves all submitted orders (for demonstration).
+  - Response: Array of order objects.
+- **GET `/api/orders/:id`**
+  - Description: Retrieves a specific order by its ID (for demonstration).
+  - Response: The order object or a "not found" message.
 
 Enjoy your pizza from PizzaByU!
