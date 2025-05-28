@@ -1,0 +1,103 @@
+// Custom Styles for PizzaByU Theme
+
+body {
+  background-color: $site-background;
+  color: $text-color;
+  font-family: $base-font-family;
+}
+
+// Header styling (assuming Minima's structure)
+.site-header {
+  background-color: $pizza-red;
+  border-bottom: 2px solid $gold-accent;
+
+  .site-title, .site-title:visited {
+    color: $light-text-on-dark; // Use light text on red background
+    &:hover {
+      color: $gold-accent;
+    }
+  }
+
+  .page-link {
+    color: $light-text-on-dark; // Light text for navigation links
+    &:hover {
+      color: $gold-accent; // Gold for hover
+    }
+  }
+
+  .site-description {
+    color: $silver-grey; // Using one of your theme colors
+    font-size: 0.9em;
+    margin-top: -15px; // Adjust as needed to position it below the title
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+}
+
+// Headings
+h1, h2, h3, h4, h5, h6 {
+  color: $pizza-red; // Red for headings
+  font-family: $heading-font-family;
+}
+
+// Links
+a {
+  color: $pizza-red;
+  &:hover {
+    color: $gold-accent;
+    text-decoration: underline;
+  }
+}
+
+// Basic button styling example
+.btn {
+  display: inline-block;
+  padding: 8px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.btn-primary {
+  @extend .btn;
+  background-color: $pizza-red;
+  color: $light-text-on-dark;
+  border: 1px solid darken($pizza-red, 10%);
+
+  &:hover {
+    background-color: darken($pizza-red, 10%);
+    color: $light-text-on-dark;
+  }
+}
+
+.btn-secondary {
+  @extend .btn;
+  background-color: $gold-accent;
+  color: $charcoal-black;
+  border: 1px solid darken($gold-accent, 10%);
+
+  &:hover {
+    background-color: darken($gold-accent, 10%);
+    color: $charcoal-black;
+  }
+}
+
+// Footer example (Minima's default footer class is .site-footer)
+.site-footer {
+  background-color: $charcoal-black;
+  color: $silver-grey;
+  // padding: $spacing-unit / 2; // Using Minima's $spacing-unit
+  border-top: 2px solid $gold-accent;
+  text-align: center;
+
+  a {
+    color: $gold-accent;
+    &:hover {
+      color: $silver-grey;
+    }
+  }
+}
+
+// You can add more specific styles for elements from PizzaByU here
+// e.g., .pizza-card, .order-summary, etc.

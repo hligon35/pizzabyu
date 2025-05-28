@@ -1,0 +1,24 @@
+// Custom Variables for PizzaByU Theme
+
+// Core Colors
+$pizza-red: #D92B2B;       // A vibrant red, like tomato sauce or pepperoni
+$silver-grey: #BDC3C7;     // A light, clean silver
+$gold-accent: #F1C40F;     // A warm, inviting gold
+$charcoal-black: #2c3e50;  // A softer, more modern black for text and dark elements
+$pure-black: #000000;      // For strong accents if needed
+
+// Backgrounds and Text
+$site-background: #f8f9fa; // A very light grey or off-white for the main background
+$text-color: $charcoal-black;
+$light-text-on-dark: #ecf0f1; // For text on dark backgrounds (e.g., red or black)
+
+// Borders and Accents
+$border-color: darken($silver-grey, 15%);
+
+// Font Stacks (Consider what PizzaByU uses)
+$base-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+$heading-font-family: $base-font-family; // Or a more distinct display font
+
+// Spacing unit (Minima uses $spacing-unit: 30px by default)
+// You can uncomment and change if needed, or use Minima's default.
+// $spacing-unit: 30px;
